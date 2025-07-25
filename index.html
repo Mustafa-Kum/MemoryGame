@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Türkiye Sigorta Hafıza Oyunu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    /* Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    :root {
+      --primary-color: #1A3B78; /* Türkiye Sigorta deep navy blue */
+      --secondary-color: #0c1256; /* Türkiye Sigorta teal/light blue */
+      --accent-color: #E63A46; /* Türkiye Sigorta red accent */
+      --background-color: #f5f9ff;
+      --card-border-color: #c3e8f1; /* Deep navy for depth */
+      --card-back-color: #c3e8f1; /* Card back color */
+      --text-color: #0c1256; /* Darker text for better readability */
+      --success-color: #4DB1CB; /* Success color using teal blue */
+      --shadow-color: rgba(26, 59, 120, 0.2); /* Softer, branded shadows */
+      --card-size: 90px;  /* Default card size optimized for portrait */
+      --card-gap: 12px;   /* Proper gap for portrait */
+      --animation-speed: 0.5s;
+      --inactive-level-color: #d8eaff; /* Lighter blue for inactive levels */
+      --gradient-top: #ffffff; /* White gradient top */
+      --gradient-middle: #f5f9ff; /* Very light blue gradient middle */
+      --gradient-bottom: #eaf3ff; /* Light blue gradient bottom */
+      --header-gradient-start: #c3e8f1; /* Header gradient start */
+      --header-gradient-end: #ffffff; /* Header gradient end - slightly darker */
+      --button-gradient-start: #1A3B78; /* Button gradient start */
+      --button-gradient-end: #152F66; /* Button gradient end */
+      --button-hover-color: #4DB1CB; /* Button hover color */
+      --card-front-border: #4DB1CB; /* Card front border */
+      --level-complete-gradient-start: #1A3B78;
+      --level-complete-gradient-end: #152F66;
+    }
+    
+    body {
+      background: linear-gradient(to bottom, var(--header-gradient-start), var(--header-gradient-end));
+      color: var(--text-color);
+      font-family: 'Roboto', sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+    }
+    
+    .particles-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+    
+    .container {
+      width: 95%;
+      max-width: 450px;  /* Default max-width for smaller screens */
+      text-align: center;
+      position: relative;
+      padding: 15px;
+      background-color: white;
+      border-radius: 20px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 4px 20px var(--shadow-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 auto;
+      height: 95vh; /* Fixed height to prevent scrolling */
+      height: calc(var(--vh, 1vh) * 95); /* Use custom vh property when available */
+      max-height: 95vh; /* Ensure it doesn't overflow */
+      overflow: hidden; /* Prevent any internal scrolling */
+    }
+    
+    /* Header Styles */
+    .game-header {
+      width: 100%;
+      margin-bottom: 10px; /* Reduced margin */
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0; /* Prevent header from shrinking */
+      background: linear-gradient(to bottom, var(--header-gradient-start), var(--header-gradient-end));
+      border-radius: 15px;
+      padding: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .brand-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px; /* Reduced margin */
+      transform: translateY(5px); /* Reduced transform */
+      position: relative;
+      z-index: 2;
+    }
+    
+    .brand-logo {
+      height: 30px; /* Match the app's more compact logo size */
+      margin-right: 10px;
+      background-image: url('Images/turkiye-sigorta-logo.png'), url('Images/placeholder-logo.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      filter: none; /* Remove shadow for cleaner look */
+    }
+    
+    h1 {
+      font-size: 1.8rem; /* Smaller heading to match app's scale */
+      margin-bottom: 10px;
+      color: 0c1256;
+      text-shadow: none; /* Remove shadow for cleaner look */
+      position: relative;
+      display: inline-block;
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 2px; /* Thinner underline */
+      background-color: var(--secondary-color); /* Use teal instead of gold */
+      border-radius: 2px;
+      box-shadow: none; /* Remove shadow for cleaner look */
+    }
+    
+    .game-info {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin-bottom: 10px; /* Reduced margin */
+      font-size: 1.6rem;
+      gap: 15px;
+      transform: translateY(5px); /* Reduced transform */
+      position: relative;
+      z-index: 2;
+    }
+    
+    .level-display, .timer-display, .attempts-display {
+      background: linear-gradient(to bottom, var(--header-gradient-start), var(--header-gradient-end));
+      color: 0c1256;
+      padding: 0 15px 0 40px;
+      border-radius: 30px;
+      box-shadow: 0 4px 8px var(--shadow-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--secondary-color);
+      font-weight: bold;
+      font-size: 1.1rem;
+      min-width: 90px;
+      height: 40px;
+      position: relative;
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+      transform: scale(1);
+    }
+    
+    /* Target specifically the level display to adjust spacing */
+    .level-display span {
+      margin-right: 3px;
+    }
+    
+    .level-display.glow {
+      box-shadow: 0 0 15px var(--secondary-color);
+      animation: subtleGlow 1.5s ease-in-out;
+    }
+    
+    @keyframes subtleGlow {
+      0% { box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); }
+      50% { box-shadow: 0 0 20px var(--secondary-color); }
+      100% { box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); }
+    }
+    
+    .level-icon, .timer-icon, .attempts-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: var(--secondary-color);
+    }
+    
+    .level-progress {
+      display: flex;
+      justify-content: center;
+      margin-top: 5px; /* Reduced margin */
+      margin-bottom: 5px; /* Reduced margin */
+      gap: 8px;
+      transform: translateY(5px); /* Reduced transform */
+      position: relative;
+      z-index: 2;
+    }
+    
+    .level-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--inactive-level-color);
+      border: 1px solid var(--primary-color);
+      transition: all 0.3s ease;
+    }
+    
+    .level-indicator.active {
+      background-color: var(--secondary-color);
+      box-shadow: 0 0 3px var(--secondary-color);
+      transform: scale(1.1);
+    }
+    
+    .level-indicator.completed {
+      background-color: var(--success-color);
+    }
+    
+    /* Card Grid Layout - optimized for portrait */
+    #gameBoard {
+      display: grid;
+      gap: 12px;
+      margin: 0 auto; /* Changed from 5px to 0 to maximize vertical space */
+      width: 100%;
+      grid-template-columns: repeat(3, 1fr);  /* Force 3 columns by default */
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+      transform: translateY(0); /* Removed negative transform to avoid pushing board up */
+      position: relative;
+      z-index: 1;
+      overflow: hidden; /* Prevent internal scrolling */
+      transition: all 0.3s ease; /* Add transition for smoother adjustments */
+    }
+    
+    /* Dynamic card sizing based on number of cards */
+    .card {
+      perspective: 1000px;
+      cursor: pointer;
+      width: 100%;
+      aspect-ratio: 3/4; /* Card aspect ratio similar to standard playing cards */
+      margin: 0 auto;
+      transform: scale(1.08); /* Reduced from 1.15 to make cards a bit smaller by default */
+      transition: transform 0.2s ease;
+    }
+    
+    .card:hover {
+      transform: scale(1.15); /* Reduced from 1.22 for a more compact hover effect */
+      box-shadow: 0 4px 12px var(--shadow-color);
+    }
+    
+    .card.flipped:hover {
+      transform: scale(1.15); /* Matched to hover scale */
+    }
+    
+    /* Level-specific card scaling - Add this new section */
+    /* For level 2 (12 cards) */
+    body[data-level="2"] .card {
+      transform: scale(1);
+    }
+    
+    body[data-level="2"] .card:hover,
+    body[data-level="2"] .card.flipped:hover {
+      transform: scale(1.07);
+    }
+    
+    /* For level 3 (16 cards) */
+    body[data-level="3"] .card {
+      transform: scale(0.95);
+    }
+    
+    body[data-level="3"] .card:hover,
+    body[data-level="3"] .card.flipped:hover {
+      transform: scale(1.02);
+    }
+    
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform var(--animation-speed) cubic-bezier(0.4, 0.0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+    
+    .card.matched .card-inner {
+      animation: pulse 1s ease-in-out;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: rotateY(180deg) scale(1); }
+      50% { transform: rotateY(180deg) scale(1.05); }
+    }
+    
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 10px;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% 100%; /* Ensure image covers entire card */
+      box-shadow: 0 4px 8px var(--shadow-color);
+      overflow: hidden;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card-back {
+      background-color: var(--card-back-color);
+      background-image: url('Images/spriteback.png');
+      background-size: cover;
+      background-position: center;
+      border-color: var(--primary-color);
+    }
+    
+    .card-front {
+      transform: rotateY(180deg);
+      background-color: white;
+      border-color: var(--card-front-border);
+      box-shadow: 0 0 10px rgba(26, 59, 120, 0.3);
+    }
+    
+    .card.flipped .card-front {
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 12px rgba(77, 177, 203, 0.5);
+    }
+    
+    .card.hint .card-inner {
+      animation: hintPulse 1s infinite;
+    }
+    
+    @keyframes hintPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* Level complete Message */
+    .level-complete {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, var(--level-complete-gradient-start), var(--level-complete-gradient-end));
+      padding: 25px;
+      border-radius: 20px;
+      color: white;
+      text-align: center;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 10px 30px rgba(26, 59, 120, 0.3);
+      border: 2px solid var(--secondary-color);
+      animation: winPulse 1.5s infinite;
+      width: 85%;
+      max-width: 350px;
+    }
+    
+    @keyframes winPulse {
+      0% { box-shadow: 0 0 0 0 rgba(26, 59, 120, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(26, 59, 120, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(26, 59, 120, 0); }
+    }
+    
+    .level-complete h2 {
+      color: #ffffff;
+      margin-bottom: 15px;
+      font-size: 1.8rem;
+    }
+    
+    /* Bonus text animation */
+    .bonus-text {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translate(-50%, 0);
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transition: all 0.5s ease;
+      pointer-events: none;
+      background-color: var(--primary-color);
+      padding: 5px 15px;
+      border-radius: 20px;
+      border: 2px solid var(--secondary-color);
+    }
+    
+    .bonus-text.show {
+      animation: flyUp 1.8s ease-out;
+    }
+    
+    @keyframes flyUp {
+      0% { transform: translate(-50%, 0); opacity: 0; }
+      10% { transform: translate(-50%, -10px); opacity: 1; }
+      80% { transform: translate(-50%, -40px); opacity: 1; }
+      100% { transform: translate(-50%, -50px); opacity: 0; }
+    }
+
+    /* Reward popup */
+    .reward-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background-color: var(--card-back-color);
+      color: white;
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      z-index: 110;
+      opacity: 0;
+      transition: all 0.5s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      border: 3px solid var(--accent-color);
+      width: 85%;
+      max-width: 320px;
+    }
+    
+    .reward-popup.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    
+    .reward-popup img {
+      width: 80px;
+      height: 80px;
+      margin: 15px 0;
+    }
+    
+    /* Responsive styles - optimized for portrait */
+    @media screen and (max-width: 768px) {
+      :root {
+        --card-gap: 10px;
+      }
+      
+      .container {
+        padding: 10px;
+        width: 95%;
+        height: 98vh;
+      }
+    }
+    
+    /* iPad-specific styles */
+    @media screen and (min-width: 768px) and (max-width: 1024px) {
+      .container {
+        max-width: 650px; /* Wider container for iPad screens */
+        width: 96%;
+        padding: 15px;
+        height: 98vh;
+      }
+      
+      #gameBoard {
+        gap: 15px;
+        transform: translateY(-10px); /* Adjusted positioning */
+      }
+      
+      /* Additional adjustments for iPad to prevent scrolling */
+      body {
+        padding: 0;
+        margin: 0;
+      }
+    }
+    
+    /* iPad Mini specific */
+    @media screen and (width: 768px) and (height: 1024px), 
+           screen and (width: 1024px) and (height: 768px) {
+      .container {
+        max-width: 700px; /* Wider for iPad Mini */
+        width: 96%;
+        height: 98vh;
+      }
+    }
+    
+    /* iPad Pro specific */
+    @media screen and (min-width: 1024px) and (max-width: 1366px),
+           screen and (min-width: 1024px) and (max-height: 1366px) {
+      .container {
+        max-width: 900px; /* Much wider container for iPad Pro */
+        width: 96%;
+        padding: 15px;
+        height: 98vh;
+      }
+      
+      #gameBoard {
+        gap: 20px;
+        transform: translateY(-10px);
+        width: 95%;
+      }
+    }
+    
+    /* Remove all portrait-specific padding */
+    @media screen and (orientation: portrait) {
+      body {
+        padding: 0;
+        margin: 0;
+      }
+      
+      .container {
+        height: 100vh;
+        padding: 10px;
+      }
+    }
+    
+    /* General iPad detection - covers all iPads */
+    @media only screen and (min-device-width: 768px) and (max-device-width: 1366px) {
+      body {
+        padding: 0;
+        margin: 0;
+      }
+      
+      .container {
+        height: 98vh;
+      }
+      
+      html, body {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+
+    /* Animation for matched cards */
+    @keyframes matchSuccess {
+      0% { transform: rotateY(180deg) scale(1); }
+      50% { transform: rotateY(180deg) scale(1.15); box-shadow: 0 0 25px var(--secondary-color); }
+      100% { transform: rotateY(180deg) scale(1); }
+    }
+    
+    .card.matched .card-inner {
+      animation: matchSuccess 0.7s ease-out;
+    }
+    
+    /* Confetti animation */
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: var(--secondary-color);
+      opacity: 0;
+    }
+    
+    /* Touch active state for mobile */
+    .card.touch-active {
+      transform: scale(0.98);
+    }
+    
+    /* Level change animation */
+    @keyframes levelUp {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    .level-display.level-up {
+      animation: levelUp 0.6s ease-in-out;
+    }
+
+    /* Wrong attempt animation */
+    @keyframes wrongAttempt {
+      0% { transform: scale(1) translateX(0); background-color: var(--card-back-color); box-shadow: 0 4px 8px var(--shadow-color); }
+      10% { transform: scale(1.1) translateX(-3px); background-color: var(--accent-color); box-shadow: 0 0 12px var(--accent-color); }
+      20% { transform: scale(1.1) translateX(3px); background-color: var(--accent-color); box-shadow: 0 0 12px var(--accent-color); }
+      30% { transform: scale(1.1) translateX(-3px); background-color: var(--accent-color); box-shadow: 0 0 12px var(--accent-color); }
+      40% { transform: scale(1.1) translateX(3px); background-color: var(--accent-color); box-shadow: 0 0 12px var(--accent-color); }
+      50% { transform: scale(1.1) translateX(0); background-color: var(--accent-color); box-shadow: 0 0 12px var(--accent-color); }
+      75% { transform: scale(1.05); background-color: var(--accent-color); box-shadow: 0 0 8px var(--accent-color); }
+      100% { transform: scale(1); background-color: var(--card-back-color); box-shadow: 0 4px 8px var(--shadow-color); }
+    }
+    
+    .attempts-display.wrong-attempt {
+      animation: wrongAttempt 0.6s ease-in-out;
+    }
+
+    /* Additional adjustments for smaller screens */
+    @media screen and (max-width: 480px) {
+      :root {
+        --card-gap: 8px;
+      }
+      
+      .game-info {
+        gap: 12px;
+      }
+    }
+    
+    /* Make sure cards are always in 3 columns for consistency */
+    #gameBoard {
+      grid-template-columns: repeat(3, 1fr) !important;
+    }
+
+    /* Level-specific adjustments for container spacing */
+    body[data-level="2"] .game-header,
+    body[data-level="3"] .game-header {
+      margin-bottom: 5px;
+      padding-bottom: 5px;
+    }
+    
+    body[data-level="2"] .game-info,
+    body[data-level="3"] .game-info {
+      margin-bottom: 5px;
+    }
+    
+    body[data-level="2"] .brand-header,
+    body[data-level="3"] .brand-header {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="particles-container" id="particles"></div>
+  
+  <div class="container">
+    <div class="game-header">
+      <div class="brand-header">
+        <img src="Images/turkiye-sigorta-logo.png" alt="Türkiye Sigorta" class="brand-logo" onerror="this.src='Images/sprite1.png'; this.style.height='40px'">
+        <h1>Hafıza Oyunu</h1>
+      </div>
+      <div class="game-info">
+        <div class="level-display"><span class="material-icons level-icon">stars</span><span>Lv</span><span id="levelDisplay">1</span></div>
+        <div class="timer-display"><span class="material-icons timer-icon">timer</span><span id="timerDisplay">1:00</span></div>
+        <div class="attempts-display"><span class="material-icons attempts-icon">error_outline</span><span id="attemptsDisplay">0/5</span></div>
+      </div>
+    </div>
+    
+    <div id="gameBoard"></div>
+  </div>
+  
+  <!-- Level complete message -->
+  <div class="level-complete" id="levelComplete">
+    <h2>Seviye Tamamlandı!</h2>
+    <p>Harika iş! Bir sonraki seviyeye geçiliyor...</p>
+  </div>
+  
+  <!-- Tooltip container -->
+  <div class="tooltip-container" id="tooltipContainer" style="display: none;"></div>
+
+  <script>
+    /* ==============================================
+       Particle System for background visual effects
+    ============================================== */
+    const ParticleSystem = (function() {
+      const particles = [];
+      const container = document.getElementById('particles');
+      const colors = ['#1A3B78', '#4DB1CB', '#E63A46', '#366EA5', '#152F66'];
+      const maxParticles = 50;
+      
+      function createParticle() {
+        if (particles.length >= maxParticles) return;
+        
+        const particle = document.createElement('div');
+        particle.classList.add('confetti');
+        
+        // Random properties
+        const size = Math.random() * 8 + 5;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const rotation = Math.random() * 360;
+        const x = Math.random() * window.innerWidth;
+        const y = -20;
+        const speedX = Math.random() * 2 - 1;
+        const speedY = Math.random() * 2 + 1;
+        const rotationSpeed = Math.random() * 2 - 1;
+        
+        // Set styles
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.backgroundColor = color;
+        particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        particle.style.position = 'absolute';
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        particle.style.transform = `rotate(${rotation}deg)`;
+        particle.style.opacity = '0.8';
+        
+        container.appendChild(particle);
+        
+        particles.push({
+          element: particle,
+          x,
+          y,
+          speedX,
+          speedY,
+          rotation,
+          rotationSpeed,
+          size,
+          color
+        });
+      }
+
+      function updateParticles() {
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const particle = particles[i];
+          
+          particle.y += particle.speedY;
+          particle.x += particle.speedX;
+          particle.rotation += particle.rotationSpeed;
+          
+          particle.element.style.top = `${particle.y}px`;
+          particle.element.style.left = `${particle.x}px`;
+          particle.element.style.transform = `rotate(${particle.rotation}deg)`;
+          
+          // Apply gravity if particle has that property
+          if (particle.gravity) {
+            particle.speedY += particle.gravity;
+          }
+          
+          // Apply opacity fade if particle has that property
+          if (particle.opacity !== undefined) {
+            particle.opacity -= 0.01;
+            particle.element.style.opacity = Math.max(0, particle.opacity);
+          }
+          
+          // Remove particles that are off-screen or fully transparent
+          if (particle.y > window.innerHeight || (particle.opacity !== undefined && particle.opacity <= 0)) {
+            container.removeChild(particle.element);
+            particles.splice(i, 1);
+          }
+        }
+      }
+      
+      function startParticleSystem() {
+        setInterval(createParticle, 200);
+        setInterval(updateParticles, 16);
+      }
+      
+      function burstParticles(x, y, count = 20, customColor = null) {
+        for (let i = 0; i < count; i++) {
+          const particle = document.createElement('div');
+          particle.classList.add('confetti');
+          
+          // Random properties
+          const size = Math.random() * 10 + 5;
+          const color = customColor || colors[Math.floor(Math.random() * colors.length)];
+          const rotation = Math.random() * 360;
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 3 + 2;
+          const speedX = Math.cos(angle) * speed;
+          const speedY = Math.sin(angle) * speed;
+          const rotationSpeed = Math.random() * 10 - 5;
+          
+          // Set styles
+          particle.style.width = `${size}px`;
+          particle.style.height = `${size}px`;
+          particle.style.backgroundColor = color;
+          particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+          particle.style.position = 'absolute';
+          particle.style.left = `${x}px`;
+          particle.style.top = `${y}px`;
+          particle.style.transform = `rotate(${rotation}deg)`;
+          particle.style.opacity = '1';
+          particle.style.pointerEvents = 'none';
+          
+          container.appendChild(particle);
+          
+          const newParticle = {
+            element: particle,
+            x,
+            y,
+            speedX,
+            speedY,
+            rotation,
+            rotationSpeed,
+            opacity: 1,
+            gravity: 0.1
+          };
+          
+          particles.push(newParticle);
+        }
+      }
+      
+      return {
+        start: startParticleSystem,
+        burst: burstParticles
+      };
+    })();
+
+    /* ============================================
+       Audio System – handles all game sounds with Web Audio API
+    ============================================ */
+    const AudioSystem = (function() {
+      let audioContext;
+      let soundEnabled = true;
+      let tickingNode = null; // Reference to track the ticking sound
+      let audioInitialized = false;
+      let backgroundMusicNode = null; // Reference to background music
+      let cachedClickSound = null; // Cached instance of click sound for immediate playback
+      
+      // Initialize audio system
+      function init() {
+        try {
+          // Create audio context but don't start it yet (needs user interaction)
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          
+          // Start audio on first user interaction
+          const startAudioHandler = function() {
+            if (audioContext.state === 'suspended') {
+              audioContext.resume().then(() => {
+                console.log('AudioContext resumed successfully');
+                audioInitialized = true;
+                
+                // Start background music once audio context is resumed
+                playBackgroundMusic();
+                
+                // Pre-cache click sound for instant response
+                cachedClickSound = new Audio('Sounds/ClickSound.MP3');
+                cachedClickSound.volume = 0.65;
+                cachedClickSound.load();
+              });
+            } else {
+              audioInitialized = true;
+              
+              // Start background music once audio context is resumed
+              playBackgroundMusic();
+              
+              // Pre-cache click sound for instant response
+              cachedClickSound = new Audio('Sounds/ClickSound.MP3');
+              cachedClickSound.volume = 0.65;
+              cachedClickSound.load();
+            }
+            document.body.removeEventListener('click', startAudioHandler);
+            document.body.removeEventListener('touchstart', startAudioHandler);
+          };
+          
+          // Listen for both click and touch events to handle all device types
+          document.body.addEventListener('click', startAudioHandler, { once: true });
+          document.body.addEventListener('touchstart', startAudioHandler, { once: true });
+          
+          // Preload sounds
+          preloadSound('Sounds/ClockTickTock.MP3');
+          preloadSound('Sounds/CorrectSound.MP3');
+          preloadSound('Sounds/ClickSound.MP3');
+          preloadSound('Sounds/CardTurnSound.MP3');
+          preloadSound('Sounds/WrongAnswerSound.MP3');
+          preloadSound('Sounds/BackgroundSound.mp3');
+          
+        } catch (e) {
+          console.log("Web Audio API not supported in this browser:", e);
+          // Create fallback audio system that does nothing
+          audioContext = null;
+        }
+      }
+      
+      // Preload a sound file
+      function preloadSound(url) {
+        const audio = new Audio();
+        audio.src = url;
+        // Just load it, don't play
+        audio.preload = 'auto';
+        audio.load();
+      }
+      
+      // Play background music
+      function playBackgroundMusic() {
+        if (!soundEnabled) return;
+        
+        try {
+          // Stop existing background music if it's already playing
+          if (backgroundMusicNode) {
+            stopBackgroundMusic();
+          }
+          
+          // Create audio element for the background music
+          const bgMusic = new Audio('Sounds/BackgroundSound.mp3');
+          bgMusic.loop = true; // Loop continuously 
+          
+          if (audioContext) {
+            // Create media element source in Web Audio API
+            const source = audioContext.createMediaElementSource(bgMusic);
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = 0.01; // Reduced from 0.03 to 0.01 for extremely quiet background music
+            
+            // Connect nodes
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Store reference to stop later
+            backgroundMusicNode = {
+              element: bgMusic,
+              source: source,
+              gain: gainNode
+            };
+          } else {
+            // Fallback without Web Audio API
+            bgMusic.volume = 0.01; // Reduced from 0.03 to 0.01 for extremely quiet background music
+            backgroundMusicNode = {
+              element: bgMusic
+            };
+          }
+          
+          // Start playing
+          const playPromise = bgMusic.play();
+          
+          // Handle play promise to catch any autoplay policy errors
+          if (playPromise !== undefined) {
+            playPromise.catch(err => {
+              console.log("Error playing background music:", err);
+              // If autoplay was prevented, we'll try again on next user interaction
+              const retryPlayHandler = function() {
+                if (backgroundMusicNode && backgroundMusicNode.element) {
+                  backgroundMusicNode.element.play()
+                    .then(() => {
+                      console.log("Background music playing after user interaction");
+                      document.body.removeEventListener('click', retryPlayHandler);
+                      document.body.removeEventListener('touchstart', retryPlayHandler);
+                    })
+                    .catch(err => console.log("Still couldn't play background music:", err));
+                }
+              };
+              
+              document.body.addEventListener('click', retryPlayHandler, { once: true });
+              document.body.addEventListener('touchstart', retryPlayHandler, { once: true });
+            });
+          }
+        } catch (err) {
+          console.log("Failed to play background music:", err);
+        }
+      }
+      
+      // Stop background music
+      function stopBackgroundMusic() {
+        if (!backgroundMusicNode) return;
+        
+        try {
+          // Fade out gracefully
+          if (audioContext && backgroundMusicNode.gain) {
+            const now = audioContext.currentTime;
+            backgroundMusicNode.gain.gain.setValueAtTime(backgroundMusicNode.gain.gain.value, now);
+            backgroundMusicNode.gain.gain.linearRampToValueAtTime(0, now + 0.5);
+            
+            // Stop completely after fade
+            setTimeout(() => {
+              if (backgroundMusicNode && backgroundMusicNode.element) {
+                backgroundMusicNode.element.pause();
+                backgroundMusicNode.element.currentTime = 0;
+              }
+              backgroundMusicNode = null;
+            }, 500);
+          } else if (backgroundMusicNode.element) {
+            // Fallback without fading
+            backgroundMusicNode.element.pause();
+            backgroundMusicNode.element.currentTime = 0;
+            backgroundMusicNode = null;
+          }
+        } catch (err) {
+          console.log("Error stopping background music:", err);
+          // Ensure node is cleaned up even if there's an error
+          backgroundMusicNode = null;
+        }
+      }
+      
+      // Play a sound by name
+      function playSound(soundName) {
+        if (!soundEnabled) return;
+        
+        // Try to initialize audio context again if it wasn't ready before
+        if (audioContext && audioContext.state === 'suspended') {
+          audioContext.resume().then(() => {
+            audioInitialized = true;
+            console.log('AudioContext resumed on demand');
+          });
+        }
+        
+        switch(soundName) {
+          case 'ticking':
+            playTickTock();
+            break;
+          case 'stopTicking':
+            stopTickTock();
+            break;
+          case 'correctMatch':
+            playCorrectMatch();
+            break;
+          case 'cardClick':
+            playCardClick();
+            break;
+          case 'cardTurn':
+            playCardTurn();
+            break;
+          case 'wrongAnswer':
+            playWrongAnswer();
+            break;
+          case 'backgroundMusic':
+            playBackgroundMusic();
+            break;
+          case 'stopBackgroundMusic':
+            stopBackgroundMusic();
+            break;
+        }
+      }
+      
+      // Play wrong answer sound
+      function playWrongAnswer() {
+        try {
+          // Create audio element for the wrong answer sound
+          const wrongSound = new Audio('Sounds/WrongAnswerSound.MP3');
+          
+          if (audioContext) {
+            // Create media element source in Web Audio API
+            const source = audioContext.createMediaElementSource(wrongSound);
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = 0.9; // Increased from 0.7 to 0.9 for much louder effect
+            
+            // Connect nodes
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Start playing
+            const playPromise = wrongSound.play();
+            
+            // Handle play promise to catch any autoplay policy errors
+            if (playPromise !== undefined) {
+              playPromise.catch(err => {
+                console.log("Error playing wrong answer sound:", err);
+              });
+            }
+          } else {
+            // Fallback without Web Audio API
+            wrongSound.volume = 0.9; // Increased from 0.7 to 0.9 for much louder effect
+            wrongSound.play().catch(err => console.log("Error playing wrong answer sound:", err));
+          }
+        } catch (err) {
+          console.log("Failed to play wrong answer sound:", err);
+        }
+      }
+      
+      // Play card turn sound
+      function playCardTurn() {
+        try {
+          // Create audio element for the card turn sound
+          const turnSound = new Audio('Sounds/CardTurnSound.MP3');
+          
+          if (audioContext) {
+            // Create media element source in Web Audio API
+            const source = audioContext.createMediaElementSource(turnSound);
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = 0.8; // Increased from 0.6 to 0.8 for much louder effect
+            
+            // Connect nodes
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Start playing
+            const playPromise = turnSound.play();
+            
+            // Handle play promise to catch any autoplay policy errors
+            if (playPromise !== undefined) {
+              playPromise.catch(err => {
+                console.log("Error playing card turn sound:", err);
+              });
+            }
+          } else {
+            // Fallback without Web Audio API
+            turnSound.volume = 0.8; // Increased from 0.6 to 0.8 for much louder effect
+            turnSound.play().catch(err => console.log("Error playing card turn sound:", err));
+          }
+        } catch (err) {
+          console.log("Failed to play card turn sound:", err);
+        }
+      }
+      
+      // Play card click sound
+      function playCardClick() {
+        try {
+          // Try to use cached sound first for immediate response
+          if (cachedClickSound) {
+            // Clone the cached sound to allow for overlapping playback
+            try {
+              // Try playing the cached sound
+              cachedClickSound.currentTime = 0;
+              cachedClickSound.play()
+                .catch(err => {
+                  console.log("Error playing cached click sound, creating new one:", err);
+                  playFreshClickSound();
+                });
+              return;
+            } catch (err) {
+              console.log("Error with cached sound, falling back:", err);
+              // If playing the cached sound fails, create a new one
+              playFreshClickSound();
+            }
+          } else {
+            // No cached sound available, create a new one
+            playFreshClickSound();
+          }
+        } catch (err) {
+          console.log("Failed to play click sound:", err);
+        }
+      }
+      
+      // Helper function to play a fresh click sound
+      function playFreshClickSound() {
+        const clickSound = new Audio('Sounds/ClickSound.MP3');
+        
+        // Set volume before any async operations
+        if (audioContext) {
+          try {
+            // Try the Web Audio API approach
+            const source = audioContext.createMediaElementSource(clickSound);
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = 0.65; // Keep the increased volume
+            
+            // Connect nodes
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Start playing immediately
+            clickSound.play().catch(err => {
+              console.log("Error with Web Audio API, using simple playback:", err);
+              // Fallback to simpler method
+              const fallbackSound = new Audio('Sounds/ClickSound.MP3');
+              fallbackSound.volume = 0.65;
+              fallbackSound.play();
+            });
+          } catch (err) {
+            // If Web Audio API fails, use simple audio playback
+            console.log("Web Audio API error, using fallback:", err);
+            clickSound.volume = 0.65;
+            clickSound.play();
+          }
+        } else {
+          // Simple audio playback for browsers without Web Audio API
+          clickSound.volume = 0.65;
+          clickSound.play().catch(err => console.log("Error playing click sound:", err));
+        }
+      }
+      
+      // Play correct match sound
+      function playCorrectMatch() {
+        try {
+          // Create audio element for the correct match sound
+          const correctSound = new Audio('Sounds/CorrectSound.MP3');
+          
+          if (audioContext) {
+            // Create media element source in Web Audio API
+            const source = audioContext.createMediaElementSource(correctSound);
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = 0.95; // Increased from 0.7 to 0.95 for much louder effect
+            
+            // Connect nodes
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Start playing
+            const playPromise = correctSound.play();
+            
+            // Handle play promise to catch any autoplay policy errors
+            if (playPromise !== undefined) {
+              playPromise.catch(err => {
+                console.log("Error playing correct match sound:", err);
+                // If autoplay was prevented, try on next user interaction
+                const retryPlayHandler = function() {
+                  correctSound.play()
+                    .then(() => {
+                      console.log("Correct match sound playing after user interaction");
+                      document.body.removeEventListener('click', retryPlayHandler);
+                      document.body.removeEventListener('touchstart', retryPlayHandler);
+                    })
+                    .catch(err => console.log("Still couldn't play correct match sound:", err));
+                };
+                
+                document.body.addEventListener('click', retryPlayHandler, { once: true });
+                document.body.addEventListener('touchstart', retryPlayHandler, { once: true });
+              });
+            }
+          } else {
+            // Fallback without Web Audio API
+            correctSound.volume = 0.95; // Increased from 0.7 to 0.95 for much louder effect
+            correctSound.play().catch(err => console.log("Error playing correct match sound:", err));
+          }
+        } catch (err) {
+          console.log("Failed to play correct match sound:", err);
+        }
+      }
+      
+      // Play ticking clock sound for countdown
+      function playTickTock() {
+        if (tickingNode) return; // Skip if already playing
+        
+        try {
+          // Create audio element for the clock sound
+          const tickSound = new Audio('Sounds/ClockTickTock.MP3');
+          tickSound.loop = true;
+          
+          if (audioContext) {
+            // Create media element source in Web Audio API
+            const source = audioContext.createMediaElementSource(tickSound);
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = 0.7; // Increased from 0.45 to 0.7 for much louder effect
+            
+            // Connect nodes
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Store reference to stop later
+            tickingNode = {
+              element: tickSound,
+              source: source,
+              gain: gainNode
+            };
+          } else {
+            // Fallback without Web Audio API
+            tickSound.volume = 0.7; // Increased from 0.45 to 0.7 for much louder effect
+            tickingNode = {
+              element: tickSound
+            };
+          }
+          
+          // Start playing
+          const playPromise = tickSound.play();
+          
+          // Handle play promise to catch any autoplay policy errors
+          if (playPromise !== undefined) {
+            playPromise.catch(err => {
+              console.log("Error playing tick sound:", err);
+              // If autoplay was prevented, we'll try again on user interaction
+              const retryPlayHandler = function() {
+                tickSound.play()
+                  .then(() => {
+                    console.log("Tick sound playing after user interaction");
+                    document.body.removeEventListener('click', retryPlayHandler);
+                    document.body.removeEventListener('touchstart', retryPlayHandler);
+                  })
+                  .catch(err => console.log("Still couldn't play tick sound:", err));
+              };
+              
+              document.body.addEventListener('click', retryPlayHandler, { once: true });
+              document.body.addEventListener('touchstart', retryPlayHandler, { once: true });
+            });
+          }
+        } catch (err) {
+          console.log("Failed to play ticking sound:", err);
+        }
+      }
+      
+      // Stop ticking sound
+      function stopTickTock() {
+        if (!tickingNode) return;
+        
+        try {
+          // Fade out gracefully
+          if (audioContext && tickingNode.gain) {
+            const now = audioContext.currentTime;
+            tickingNode.gain.gain.setValueAtTime(tickingNode.gain.gain.value, now);
+            tickingNode.gain.gain.linearRampToValueAtTime(0, now + 0.5);
+            
+            // Stop completely after fade
+            setTimeout(() => {
+              if (tickingNode && tickingNode.element) {
+                tickingNode.element.pause();
+                tickingNode.element.currentTime = 0;
+              }
+              tickingNode = null;
+            }, 500);
+          } else if (tickingNode.element) {
+            // Fallback without fading
+            tickingNode.element.pause();
+            tickingNode.element.currentTime = 0;
+            tickingNode = null;
+          }
+        } catch (err) {
+          console.log("Error stopping tick sound:", err);
+          // Ensure node is cleaned up even if there's an error
+          tickingNode = null;
+        }
+      }
+      
+      // Public API
+      return {
+        init: init,
+        play: playSound,
+        playBackgroundMusic: playBackgroundMusic,
+        stopBackgroundMusic: stopBackgroundMusic
+      };
+    })();
+
+    /* ============================================
+       Progress System - handles scoring & rewards
+    ============================================ */
+    const ProgressSystem = (function() {
+      let comboMultiplier = 1;
+      let lastMatchTime = 0;
+      const levelDisplayContainer = document.querySelector('.level-display');
+      
+      // Initialize progress system
+      function init() {
+        // Reset values
+        comboMultiplier = 1;
+        lastMatchTime = 0;
+      }
+      
+      // Add points to score (now just tracks combo and time)
+      function addPoints(points, isCombo = false) {
+        // Fast match bonus
+        const now = Date.now();
+        const timeSinceLastMatch = now - lastMatchTime;
+        const fastMatchBonus = timeSinceLastMatch < 2000 && lastMatchTime > 0;
+        
+        // Apply fast match bonus
+        if (fastMatchBonus) {
+          showBonus("Hızlı Eşleşme!");
+          addGlowEffect();
+        }
+        
+        // Increase combo multiplier for next match
+        if (isCombo) {
+          comboMultiplier += 0.5;
+        } else {
+          comboMultiplier = 1;
+        }
+        
+        // Update time of last match
+        lastMatchTime = now;
+      }
+      
+      // Add glow effect to level display
+      function addGlowEffect() {
+        levelDisplayContainer.classList.remove('glow');
+        // Trigger reflow
+        void levelDisplayContainer.offsetWidth;
+        levelDisplayContainer.classList.add('glow');
+        
+        // Remove glow after animation
+        setTimeout(() => {
+          levelDisplayContainer.classList.remove('glow');
+        }, 1500);
+      }
+      
+      // Show bonus text animation
+      function showBonus(text) {
+        const bonusText = document.createElement('div');
+        bonusText.className = 'bonus-text';
+        bonusText.textContent = text;
+        document.querySelector('.game-header').appendChild(bonusText);
+        
+        // Trigger animation
+        setTimeout(() => {
+          bonusText.classList.add('show');
+          setTimeout(() => {
+            bonusText.classList.remove('show');
+            setTimeout(() => {
+              if (bonusText.parentNode) {
+                bonusText.parentNode.removeChild(bonusText);
+              }
+            }, 500);
+          }, 1500);
+        }, 10);
+      }
+      
+      // Reset combo multiplier
+      function resetCombo() {
+        comboMultiplier = 1;
+      }
+      
+      // Public API
+      return {
+        init: init,
+        addPoints: addPoints,
+        resetCombo: resetCombo,
+        showBonus: showBonus,
+        addGlowEffect: addGlowEffect
+      };
+    })();
+    
+    /* ============================================
+       Game Module – encapsulates game logic
+    ============================================ */
+    const Game = (function() {
+      // DOM elements
+      const gameBoard = document.getElementById("gameBoard");
+      const levelDisplay = document.getElementById("levelDisplay");
+      const levelDisplayContainer = document.querySelector(".level-display");
+      const levelCompleteMessage = document.getElementById("levelComplete");
+      const timerDisplay = document.getElementById("timerDisplay");
+      const attemptsDisplay = document.getElementById("attemptsDisplay");
+      
+      // Level configuration
+      const levels = [
+        { level: 1, pairs: 4 },  // 8 cards
+        { level: 2, pairs: 6 },  // 12 cards
+        { level: 3, pairs: 8 }   // 16 cards
+      ];
+      
+      // Card sprites
+      const cardSprites = [
+        { id: 'sprite3', front: 'Images/sprite3.png' },
+        { id: 'sprite4', front: 'Images/sprite4.png' },
+        { id: 'sprite5', front: 'Images/sprite5.png' },
+        { id: 'sprite6', front: 'Images/sprite6.png' },
+        { id: 'sprite7', front: 'Images/sprite7.png' },
+        { id: 'sprite8', front: 'Images/sprite8.png' },
+        { id: 'sprite9', front: 'Images/sprite9.png' },
+        { id: 'sprite10', front: 'Images/sprite10.png' }
+      ];
+      
+      let currentLevel = 0;
+      let cardArray = [];
+      let flippedCards = [];
+      let matchedPairs = 0;
+      let canFlip = false; // Start with false to prevent flipping during initial reveal
+      let gamePaused = false;
+      let timerInterval = null;
+      let timeRemaining = 60; // Changed from 109 to 60 for 1 minute countdown
+      let wrongAttempts = 0;
+      let maxWrongAttempts = 5;
+      let initialRevealDuration = 5; // seconds to show all cards at start
+      
+      // Initialize game
+      function init() {
+        startLevel(0);
+        
+        // Initialize subsystems
+        AudioSystem.init();
+        ProgressSystem.init();
+        
+        // Start particle effects
+        ParticleSystem.start();
+
+        // Set up timer and attempts display
+        timerDisplay.textContent = formatTime(timeRemaining);
+        attemptsDisplay.textContent = `${wrongAttempts}/${maxWrongAttempts}`;
+      }
+      
+      // Format time in MM:SS format
+      function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        // Format without leading zeros for minutes < 10
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+      }
+      
+      // Start a specific level
+      function startLevel(levelIndex) {
+        currentLevel = levelIndex;
+        
+        // Set body data attribute for level-specific styling
+        document.body.setAttribute('data-level', levels[currentLevel].level);
+        
+        createGameBoard();
+        
+        // Reset game state
+        resetGameState();
+        
+        // Show all cards initially (face up)
+        showAllCardsInitially();
+      }
+      
+      // Reset game state for new level
+      function resetGameState() {
+        // Reset timer
+        clearInterval(timerInterval);
+        timeRemaining = 60; // Changed from 109 to 60 for 1 minute countdown
+        timerDisplay.textContent = "1:00"; // Changed from "1:49" to "1:00"
+        
+        // Reset attempts
+        wrongAttempts = 0;
+        attemptsDisplay.textContent = "0/5";
+        
+        // Reset flipping state
+        canFlip = false;
+      }
+      
+      // Show all cards initially for a few seconds
+      function showAllCardsInitially() {
+        const allCards = document.querySelectorAll('.card');
+        
+        // Flip all cards face up
+        allCards.forEach((card, index) => {
+          // Stagger the card flips slightly for a better effect
+          setTimeout(() => {
+            card.classList.add('flipped');
+            // Play card turn sound with reduced frequency to avoid sound overload
+            if (index % 2 === 0) {
+              AudioSystem.play('cardTurn');
+            }
+          }, index * 100);
+        });
+        
+        // Wait for initialRevealDuration seconds before flipping cards back
+        setTimeout(() => {
+          // Time's up - flip cards back and start game
+          allCards.forEach((card, index) => {
+            if (!card.classList.contains('matched')) {
+              // Stagger the card flips slightly for a better effect
+              setTimeout(() => {
+                card.classList.remove('flipped');
+                // Play card turn sound with reduced frequency
+                if (index % 2 === 0) {
+                  AudioSystem.play('cardTurn');
+                }
+              }, index * 100);
+            }
+          });
+          
+          // Start the game timer and allow flipping
+          // Delay slightly to account for the staggered card flips
+          setTimeout(() => {
+            startTimer();
+            canFlip = true;
+          }, allCards.length * 100);
+        }, initialRevealDuration * 1000);
+      }
+      
+      // Start the game timer
+      function startTimer() {
+        // Start clock ticking sound
+        AudioSystem.play('ticking');
+        
+        timerInterval = setInterval(() => {
+          timeRemaining--;
+          timerDisplay.textContent = formatTime(timeRemaining);
+          
+          if (timeRemaining <= 0) {
+            // Time's up
+            clearInterval(timerInterval);
+            // Stop ticking sound
+            AudioSystem.play('stopTicking');
+            gameOver('time');
+          }
+        }, 1000);
+      }
+      
+      // Game over handler
+      function gameOver(reason) {
+        clearInterval(timerInterval);
+        // Make sure ticking sound is stopped
+        AudioSystem.play('stopTicking');
+        // Stop background music with fade out
+        AudioSystem.play('stopBackgroundMusic');
+        canFlip = false;
+        gamePaused = true;
+        
+        // Show game over message
+        levelCompleteMessage.querySelector('h2').textContent = 'Oyun Bitti!';
+        
+        if (reason === 'time') {
+          levelCompleteMessage.querySelector('p').textContent = 'Süre doldu! Tekrar denemek için Oyunu Sıfırla butonuna basın.';
+        } else if (reason === 'attempts') {
+          levelCompleteMessage.querySelector('p').textContent = 'Maksimum yanlış eşleştirme sayısına ulaştınız! Tekrar denemek için Oyunu Sıfırla butonuna basın.';
+        }
+        
+        levelCompleteMessage.style.display = 'block';
+      }
+      
+      // Initialize level data
+      function initLevel() {
+        const config = levels[currentLevel];
+        cardArray = [];
+        matchedPairs = 0;
+        flippedCards = [];
+        
+        // Update UI displays
+        levelDisplay.textContent = config.level;
+        
+        // Animate level change
+        levelDisplayContainer.classList.remove('level-up');
+        // Trigger reflow to restart animation
+        void levelDisplayContainer.offsetWidth;
+        levelDisplayContainer.classList.add('level-up');
+        
+        // For pairs, randomly pick sprites
+        const available = cardSprites.slice(); // shallow copy
+        for (let i = 0; i < config.pairs; i++) {
+          const index = Math.floor(Math.random() * available.length);
+          const sprite = available.splice(index, 1)[0];
+          // add pair twice
+          cardArray.push(Object.assign({}, sprite));
+          cardArray.push(Object.assign({}, sprite));
+        }
+        
+        // Shuffle the cards
+        shuffleArray(cardArray);
+      }
+      
+      // Fisher-Yates shuffle algorithm
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+      
+      // Create the game board with card elements
+      function createGameBoard() {
+        initLevel();
+        
+        // Always set grid to 3 columns for consistency with the screenshot
+        gameBoard.style.gridTemplateColumns = `repeat(3, 1fr)`;
+        
+        // Clear previous board
+        gameBoard.innerHTML = "";
+        
+        // Create cards
+        cardArray.forEach((cardData, index) => {
+          const card = document.createElement("div");
+          card.classList.add("card");
+          card.dataset.id = cardData.id;
+          card.dataset.index = index;
+          card.addEventListener("click", onCardClick);
+          
+          // For touch devices
+          card.addEventListener("touchstart", function(event) {
+            // Only play click sound, don't handle the full card click logic here
+            AudioSystem.play('cardClick');
+            this.classList.add("touch-active");
+            
+            // Prevent the click handler from also firing on touch devices
+            event.preventDefault();
+          }, { passive: false });
+          
+          card.addEventListener("touchend", function() {
+            this.classList.remove("touch-active");
+            
+            // Only process the full card click logic on touchend
+            // This prevents the click sound from playing twice
+            if (gamePaused) return;
+            if (!canFlip || this.classList.contains("flipped") || this.classList.contains("matched")) return;
+            
+            // Remove hint classes
+            document.querySelectorAll('.card.hint').forEach(card => {
+              card.classList.remove('hint');
+            });
+            
+            // Flip the card
+            this.classList.add("flipped");
+            
+            // Add a small delay before playing the card turn sound
+            setTimeout(() => {
+              AudioSystem.play('cardTurn');
+            }, 80);
+            
+            flippedCards.push(this);
+            
+            if (flippedCards.length === 2) {
+              canFlip = false;
+              setTimeout(checkMatch, 600);
+            }
+          });
+          
+          // Build card inner structure
+          const cardInner = document.createElement("div");
+          cardInner.classList.add("card-inner");
+          
+          const cardFront = document.createElement("div");
+          cardFront.classList.add("card-face", "card-front");
+          cardFront.style.backgroundImage = `url('${cardData.front}')`;
+          
+          const cardBack = document.createElement("div");
+          cardBack.classList.add("card-face", "card-back");
+          
+          cardInner.appendChild(cardFront);
+          cardInner.appendChild(cardBack);
+          card.appendChild(cardInner);
+          gameBoard.appendChild(card);
+        });
+        
+        // Adjust card sizes based on number of cards
+        adjustCardSizes();
+      }
+      
+      // Adjust card sizes based on the game board and number of cards
+      function adjustCardSizes() {
+        const cards = document.querySelectorAll(".card");
+        const numCards = cards.length;
+        const containerWidth = gameBoard.clientWidth;
+        const containerHeight = gameBoard.clientHeight;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Calculate rows based on 3 columns (as fixed in the design)
+        const rows = Math.ceil(numCards / 3);
+        
+        // Responsive sizing based on viewport, container dimensions and number of cards
+        let baseSize;
+        
+        // Special case for iPad Pro screens
+        if (viewportWidth >= 1024 && viewportWidth <= 1366) {
+          baseSize = numCards <= 8 ? 160 : 
+                   numCards <= 12 ? 140 :
+                   120;
+        }
+        // Special case for iPad screens
+        else if (viewportWidth >= 768 && viewportWidth <= 1023) {
+          baseSize = numCards <= 8 ? 140 : 
+                   numCards <= 12 ? 120 :
+                   105;
+        } else if (viewportWidth <= 350) {
+          // Extra small screens
+          baseSize = numCards <= 8 ? 95 : 
+                    numCards <= 12 ? 80 :
+                    70;
+        } else if (viewportWidth <= 480) {
+          // Small screens 
+          baseSize = numCards <= 8 ? 105 : 
+                    numCards <= 12 ? 90 :
+                    75;
+        } else {
+          // Larger screens
+          baseSize = numCards <= 8 ? 130 : 
+                    numCards <= 12 ? 110 :
+                    95;
+        }
+        
+        // Calculate maximum allowed size based on container height divided by rows
+        // Allow for gaps between cards and padding
+        const gapSize = 12; // This should match the CSS gap value
+        const availableHeightPerCard = (containerHeight / rows) - (gapSize * (rows - 1) / rows);
+        const maxHeightBasedSize = availableHeightPerCard / 1.4; // 1.4 is our aspect ratio
+        
+        // Calculate maximum allowed size based on container width divided by columns
+        const columnsCount = 3; // Always 3 columns as per design
+        const availableWidthPerCard = (containerWidth / columnsCount) - (gapSize * 2); // Account for gaps
+        
+        // Take the minimum of all calculated sizes to ensure cards fit
+        baseSize = Math.min(baseSize, maxHeightBasedSize, availableWidthPerCard);
+        
+        // Apply sizes to each card with a scale adjustment based on level
+        // Scale down slightly more for higher levels with more cards
+        const scaleAdjustment = numCards <= 8 ? 1 : 
+                              numCards <= 12 ? 0.95 :
+                              0.9;
+        
+        cards.forEach(card => {
+          card.style.maxWidth = `${baseSize * scaleAdjustment}px`;
+          card.style.maxHeight = `${baseSize * 1.4 * scaleAdjustment}px`; // Maintain aspect ratio
+        });
+        
+        // Adjust container padding for levels with more cards
+        if (numCards > 8) {
+          gameBoard.style.padding = "0";
+          gameBoard.style.marginTop = "5px";
+          gameBoard.style.marginBottom = "5px";
+        } else {
+          gameBoard.style.padding = "";
+          gameBoard.style.marginTop = "";
+          gameBoard.style.marginBottom = "";
+        }
+      }
+      
+      // Handle card click
+      function onCardClick(event) {
+        // Check if this was triggered by a touch event to avoid playing sound twice
+        if (!event.type || event.type !== 'touchend') {
+          // Play card click sound immediately for responsive feedback (only for mouse clicks)
+          AudioSystem.play('cardClick');
+        }
+        
+        // Don't process clicks if game is paused
+        if (gamePaused) return;
+        
+        // Don't flip if animation in progress or card already flipped/matched
+        if (!canFlip || this.classList.contains("flipped") || this.classList.contains("matched")) return;
+        
+        // Remove any hint classes from previous hints
+        document.querySelectorAll('.card.hint').forEach(card => {
+          card.classList.remove('hint');
+        });
+        
+        // Flip the card
+        this.classList.add("flipped");
+        
+        // Add a small delay before playing the card turn sound
+        setTimeout(() => {
+          // Play card turn sound
+          AudioSystem.play('cardTurn');
+        }, 80);
+        
+        flippedCards.push(this);
+        
+        // If two cards are flipped, check for a match
+        if (flippedCards.length === 2) {
+          canFlip = false;
+          setTimeout(checkMatch, 600);
+        }
+      }
+      
+      // Check if the two flipped cards match
+      function checkMatch() {
+        const [card1, card2] = flippedCards;
+        const isMatch = card1.dataset.id === card2.dataset.id;
+        
+        if (isMatch) {
+          // Add matched class to both cards
+          card1.classList.add("matched");
+          card2.classList.add("matched");
+          
+          // Play correct match sound
+          AudioSystem.play('correctMatch');
+          
+          // Update matched pairs count
+          matchedPairs++;
+          
+          // Add points for match
+          // Don't apply combo for the last match of the level
+          const isLastMatch = matchedPairs === cardArray.length / 2;
+          ProgressSystem.addPoints(100, !isLastMatch);
+          
+          // Check for level completion
+          if (isLastMatch) {
+            setTimeout(levelComplete, 600);
+          }
+        } else {
+          // No match - play wrong answer sound
+          AudioSystem.play('wrongAnswer');
+          
+          // Flip cards back after a short delay
+          setTimeout(() => {
+            card1.classList.remove("flipped");
+            card2.classList.remove("flipped");
+            // Play card turn sound for cards flipping back
+            AudioSystem.play('cardTurn');
+          }, 400);
+          
+          // Increment wrong attempts
+          wrongAttempts++;
+          attemptsDisplay.textContent = `${wrongAttempts}/${maxWrongAttempts}`;
+          
+          // Add animation to attempts display
+          const attemptsDisplayContainer = document.querySelector('.attempts-display');
+          attemptsDisplayContainer.classList.remove('wrong-attempt');
+          // Trigger reflow to restart animation
+          void attemptsDisplayContainer.offsetWidth;
+          attemptsDisplayContainer.classList.add('wrong-attempt');
+          
+          // Create a particle burst effect at the attempts display position
+          const rect = attemptsDisplayContainer.getBoundingClientRect();
+          const burstX = rect.left + rect.width / 2;
+          const burstY = rect.top + rect.height / 2;
+          ParticleSystem.burst(burstX, burstY, 10, '#E63A46'); // Use the accent color directly
+          
+          // Remove animation class after it completes
+          setTimeout(() => {
+            attemptsDisplayContainer.classList.remove('wrong-attempt');
+          }, 600); // Match the animation duration
+          
+          // Check if max wrong attempts reached
+          if (wrongAttempts >= maxWrongAttempts) {
+            setTimeout(() => gameOver('attempts'), 600);
+          }
+          
+          // Reset combo multiplier
+          ProgressSystem.resetCombo();
+        }
+        
+        // Reset flipped cards array
+        flippedCards = [];
+        canFlip = true;
+      }
+      
+      // Handle level completion
+      function levelComplete() {
+        // Stop timer
+        clearInterval(timerInterval);
+        // Stop ticking sound
+        AudioSystem.play('stopTicking');
+        
+        // Show level complete message
+        levelCompleteMessage.style.display = 'block';
+        
+        // Show completion message
+        ProgressSystem.showBonus("Seviye Tamamlandı!");
+        
+        // Move to next level or show game complete
+        setTimeout(() => {
+          levelCompleteMessage.style.display = 'none';
+          
+          if (currentLevel < levels.length - 1) {
+            // Next level
+            startLevel(currentLevel + 1);
+          } else {
+            // Game completed - all levels done
+            showGameCompleteMessage();
+          }
+        }, 2000);
+      }
+      
+      // Show game completion message
+      function showGameCompleteMessage() {
+        // Stop background music with fade out
+        AudioSystem.play('stopBackgroundMusic');
+        
+        levelCompleteMessage.querySelector('h2').textContent = 'Oyun Tamamlandı!';
+        levelCompleteMessage.querySelector('p').textContent = 'Tebrikler! Tüm seviyeleri başarıyla tamamladınız!';
+        levelCompleteMessage.style.display = 'block';
+        
+        // Reset to level 1 after celebration
+        setTimeout(() => {
+          levelCompleteMessage.style.display = 'none';
+          levelCompleteMessage.querySelector('h2').textContent = 'Seviye Tamamlandı!';
+          levelCompleteMessage.querySelector('p').textContent = 'Harika iş! Bir sonraki seviyeye geçiliyor...';
+          
+          // Restart from level 1
+          startLevel(0);
+          
+          // Restart background music 
+          AudioSystem.play('backgroundMusic');
+        }, 3000);
+      }
+      
+      // Reset game to current level
+      function resetGame() {
+        // Reset the game board
+        createGameBoard();
+        
+        // Reset progress for current level
+        ProgressSystem.init();
+        
+        // Reset game state
+        resetGameState();
+        
+        // Restart background music
+        AudioSystem.play('stopBackgroundMusic'); // Stop current music with fade
+        setTimeout(() => {
+          AudioSystem.play('backgroundMusic'); // Restart after short delay
+        }, 500);
+        
+        // Show all cards initially (face up)
+        showAllCardsInitially();
+        
+        // Resume game
+        gamePaused = false;
+      }
+      
+      // Pause game
+      function pauseGame() {
+        gamePaused = true;
+      }
+      
+      // Resume game
+      function resumeGame() {
+        gamePaused = false;
+      }
+      
+      // Public API
+      return {
+        init: init,
+        pause: pauseGame,
+        resume: resumeGame,
+        getFlippedCards: () => flippedCards,
+        getCurrentLevel: () => currentLevel,
+        adjustCardSizes: adjustCardSizes
+      };
+    })();
+
+    // Handle window resize events
+    window.addEventListener('resize', function() {
+      // Adjust card sizes when window size changes
+      setTimeout(function() {
+        if (Game.adjustCardSizes) {
+          Game.adjustCardSizes();
+        }
+      }, 100);
+    });
+
+    // Initialize the game when DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      Game.init();
+      
+      // Apply initial scale to level display for consistency
+      document.querySelector('.level-display').classList.add('level-up');
+      
+      // Set up a resize observer to continuously adjust card sizes
+      const gameBoard = document.getElementById('gameBoard');
+      const resizeObserver = new ResizeObserver(entries => {
+        for (let entry of entries) {
+          if (entry.target === gameBoard && gameBoard.children.length > 0) {
+            if (typeof Game.adjustCardSizes === 'function') {
+              Game.adjustCardSizes();
+            }
+          }
+        }
+      });
+      
+      // Start observing the game board
+      resizeObserver.observe(gameBoard);
+      
+      // Additional resize handler on load to ensure correct sizing
+      setTimeout(function() {
+        if (Game.adjustCardSizes) {
+          Game.adjustCardSizes();
+        }
+      }, 100);
+      
+      // Another adjustment after a longer delay to ensure everything is rendered
+      setTimeout(function() {
+        if (Game.adjustCardSizes) {
+          Game.adjustCardSizes();
+        }
+      }, 500);
+      
+      // Ensure proper viewport height for mobile
+      function setViewportHeight() {
+        // First we get the viewport height and multiply it by 1% to get a value for a vh unit
+        let vh = window.innerHeight * 0.01;
+        // Then we set the value in the --vh custom property to the root of the document
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+        
+        // Force redraw to prevent scrolling
+        document.body.style.display = 'none';
+        document.body.offsetHeight; // Trigger a reflow
+        document.body.style.display = '';
+      }
+      
+      // Set initial viewport height
+      setViewportHeight();
+      
+      // Update on resize
+      window.addEventListener('resize', function() {
+        setViewportHeight();
+        
+        // Adjust card sizes when window size changes
+        setTimeout(function() {
+          if (Game.adjustCardSizes) {
+            Game.adjustCardSizes();
+          }
+        }, 100);
+      });
+      
+      // Update on orientation change
+      window.addEventListener('orientationchange', function() {
+        setTimeout(function() {
+          setViewportHeight();
+          
+          // Adjust card sizes
+          if (typeof Game.adjustCardSizes === 'function') {
+            Game.adjustCardSizes();
+          }
+        }, 200);
+      });
+      
+      // Prevent scrolling on touch devices
+      document.addEventListener('touchmove', function(e) {
+        if (e.target.closest('#gameBoard') === null) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+    });
+
+    // Fix for non-passive event listener
+    document.addEventListener('touchstart', function() {}, { passive: true });
+  </script>
+</body>
+</html>
+  
